@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(VIEWER)
+  department    String?
+  avatar        String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  assets        Asset[]   @relation("CreatedAssets")
+  assignments   AssetAssignment[]
+  maintenances  Maintenance[]
+}
+
+model Asset {
+  id              String        @id @default(cuid())
+  assetTag        String        @unique
+  name            String
+  type            AssetType
+  status          AssetStatus   @default(AVAILABLE)
+  lifecycle       Lifecycle     @default(ACTIVE)
+  serialNumber    String?       @unique
+  brand           String?
+  model           String?
+  specs           String?
+  purchaseDate    DateTime?
+  purchasePrice   Float?
+  currentValue    Float?
+  warrantyExpiry  DateTime?
+  location        String?
+  department      String?
+  assignedTo      String?
+  assignedUserId  String?
+  notes           String?
+  imageUrl        String?
+  qrCode          String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  createdBy       User          @relation("CreatedAssets", fields: [userId], references: [id])
+  userId          String
+  assignments     AssetAssignment[]
+  maintenances    Maintenance[]
+}
+
+model AssetAssignment {
+  id          String    @id @default(cuid())
+  asset       Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetId     String
+  assignedTo  String
+  assignedBy  User      @relation(fields: [userId], references: [id])
+  userId      String
+  assignedAt  DateTime  @default(now())
+  returnedAt  DateTime?
+  notes       String?
+}
+
+model Maintenance {
+  id          String            @id @default(cuid())
+  asset       Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetId     String
+  title       String
+  description String?
+  type        MaintenanceType
+  status      MaintenanceStatus @default(SCHEDULED)
+  scheduledAt DateTime
+  completedAt DateTime?
+  cost        Float?
+  vendor      String?
+  createdBy   User              @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime          @default(now())
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+enum AssetType {
+  LAPTOP
+  DESKTOP
+  PHONE
+  TABLET
+  MONITOR
+  KEYBOARD
+  MOUSE
+  PRINTER
+  SERVER
+  NETWORKING
+  SOFTWARE
+  OTHER
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  MAINTENANCE
+  RETIRED
+  LOST
+}
+
+enum Lifecycle {
+  PROCUREMENT
+  ACTIVE
+  MAINTENANCE
+  DISPOSAL
+  RETIRED
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  UPGRADE
+  INSPECTION
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
