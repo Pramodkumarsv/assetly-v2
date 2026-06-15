@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import AssetExportButton from '@/components/assets/AssetExportButton'
 import { formatCurrency, formatDate, STATUS_COLORS, LIFECYCLE_COLORS } from '@/lib/utils'
+import ExportButton from '@/components/ui/ExportButton'
 
 export default async function AssetsPage({ searchParams }: { searchParams: { q?: string; type?: string; status?: string } }) {
   const where: any = {}
@@ -30,11 +30,11 @@ export default async function AssetsPage({ searchParams }: { searchParams: { q?:
           <p className="page-subtitle">{assets.length} of {total} assets</p>
         </div>
         <div className="flex items-center gap-3">
-          <AssetExportButton />
           <Link href="/assets/import" className="btn-secondary">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-            Import Excel/CSV
+            Import CSV
           </Link>
+          <ExportButton type="assets" />
           <Link href="/assets/new" className="btn-primary">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             Add Asset

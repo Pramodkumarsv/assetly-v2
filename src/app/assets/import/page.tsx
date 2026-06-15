@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import Papa from 'papaparse'
-import * as XLSX from 'xlsx'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { generateAssetTag } from '@/lib/utils'
@@ -14,28 +13,10 @@ export default function ImportPage() {
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const name = file.name.toLowerCase()
-
-    if (name.endsWith('.csv')) {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (result) => setRows(result.data as any[]),
-      })
-      return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const data = event.target?.result
-      if (!data) return
-      const workbook = XLSX.read(data, { type: 'binary' })
-      const sheetName = workbook.SheetNames[0]
-      const sheet = workbook.Sheets[sheetName]
-      const parsed = XLSX.utils.sheet_to_json(sheet, { defval: '' })
-      setRows(parsed as any[])
-    }
-    reader.readAsBinaryString(file)
+    Papa.parse(file, {
+      header: true, skipEmptyLines: true,
+      complete: (result) => setRows(result.data as any[]),
+    })
   }
 
   async function handleImport() {
@@ -77,8 +58,8 @@ export default function ImportPage() {
 
       {/* Template */}
       <div className="card p-6 mb-5">
-        <p className="text-sm font-semibold text-zinc-300 mb-3">CSV/Excel Format</p>
-        <p className="text-xs text-zinc-500 mb-3">Your file should have these column headers (only <span className="text-white">name</span> is required):</p>
+        <p className="text-sm font-semibold text-zinc-300 mb-3">CSV Format</p>
+        <p className="text-xs text-zinc-500 mb-3">Your CSV should have these column headers (only <span className="text-white">name</span> is required):</p>
         <div className="bg-zinc-950 rounded-lg p-3 font-mono text-xs text-zinc-400 overflow-x-auto">
           name, type, status, brand, model, serialNumber, purchasePrice, location, assignedTo, department
         </div>
@@ -93,8 +74,8 @@ export default function ImportPage() {
 
       {/* Upload */}
       <div className="card p-6 mb-5">
-        <label className="label">Upload Excel or CSV File</label>
-        <input type="file" accept=".csv,.xlsx,.xls" onChange={handleFile}
+        <label className="label">Upload CSV File</label>
+        <input type="file" accept=".csv" onChange={handleFile}
           className="block w-full text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:cursor-pointer" />
       </div>
 

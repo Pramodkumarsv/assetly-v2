@@ -76,6 +76,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
               <Field label="Department" value={asset.department} />
               <Field label="Location" value={asset.location} />
               <Field label="Assigned To" value={asset.assignedTo} />
+              <Field label="Assigned Date" value={(asset as any).assignedDate ? formatDate((asset as any).assignedDate) : null} />
               {asset.specs && <div className="col-span-2"><Field label="Specifications" value={asset.specs} /></div>}
               {asset.notes && <div className="col-span-2"><Field label="Notes" value={asset.notes} /></div>}
             </div>

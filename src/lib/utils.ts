@@ -1,3 +1,10 @@
+// Fix: Parse date string as local date (not UTC) to avoid IST timezone shift
+export function parseDate(dateStr: string | null | undefined): Date | null {
+  if (!dateStr) return null
+  const [year, month, day] = dateStr.split('-').map(Number)
+  return new Date(year, month - 1, day, 12, 0, 0) // noon local time avoids any TZ shift
+}
+
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount)
 }
@@ -13,10 +20,10 @@ export function daysUntil(date: Date | string | null | undefined): number | null
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
-export function generateAssetTag(): string {
+export function generateAssetTag(prefix = 'IT'): string {
   const year = new Date().getFullYear().toString().slice(2)
   const rand = Math.random().toString(36).substring(2, 6).toUpperCase()
-  return `IT-${year}-${rand}`
+  return `${prefix}-${year}-${rand}`
 }
 
 export const STATUS_COLORS: Record<string, string> = {
@@ -41,10 +48,7 @@ export const ROLE_COLORS: Record<string, string> = {
   VIEWER:  'bg-zinc-500/10 text-zinc-400 ring-1 ring-zinc-500/20',
 }
 
-export const ASSET_TYPES = ['LAPTOP','DESKTOP','PHONE','TABLET','MONITOR','KEYBOARD','MOUSE','PRINTER','SERVER','NETWORKING','SOFTWARE','OTHER']
-export const ACCESSORY_TYPES = ASSET_TYPES.filter(type => !['LAPTOP','PHONE','TABLET','MONITOR'].includes(type))
-export function isAccessoryType(type?: string | null) {
-  return !!type && !['LAPTOP','PHONE','TABLET','MONITOR'].includes(type)
-}
+export const ASSET_TYPES = ['LAPTOP', 'DESKTOP', 'PHONE', 'TABLET', 'MONITOR']
+export const ACCESSORY_TYPES = ['KEYBOARD','MOUSE','PRINTER','SERVER','NETWORKING','SOFTWARE','HEADSET','WEBCAM','DOCKING_STATION','CABLE','CHARGER','BATTERY','STORAGE','OTHER']
 export const ASSET_STATUSES = ['AVAILABLE','ASSIGNED','MAINTENANCE','RETIRED','LOST']
 export const LIFECYCLE_STAGES = ['PROCUREMENT','ACTIVE','MAINTENANCE','DISPOSAL','RETIRED']

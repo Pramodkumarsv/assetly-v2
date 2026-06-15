@@ -37,4 +37,3 @@ npm run dev
 - admin@company.com / admin123 (ADMIN)
 - manager@company.com / admin123 (MANAGER)
 - viewer@company.com / admin123 (VIEWER)
-# assetly-v2

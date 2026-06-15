@@ -7,9 +7,9 @@ import { parseDate } from '@/lib/utils'
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const asset = await prisma.asset.findUnique({ where: { id: params.id } })
-  if (!asset) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(asset)
+  const item = await prisma.accessory.findUnique({ where: { id: params.id } })
+  if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  return NextResponse.json(item)
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -19,29 +19,25 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (role === 'VIEWER') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const existing = await prisma.asset.findUnique({ where: { id: params.id } })
+  const existing = await prisma.accessory.findUnique({ where: { id: params.id } })
 
-  // Auto-capture assignedDate when assignedTo changes
   const assignedToChanged = body.assignedTo && body.assignedTo !== existing?.assignedTo
   const assignedDate = assignedToChanged
     ? new Date()
     : (body.assignedTo ? existing?.assignedDate : null)
 
-  const asset = await prisma.asset.update({
+  const item = await prisma.accessory.update({
     where: { id: params.id },
     data: {
       assetTag:       body.assetTag,
       name:           body.name,
       type:           body.type,
       status:         body.status,
-      lifecycle:      body.lifecycle,
       serialNumber:   body.serialNumber || null,
       brand:          body.brand || null,
       model:          body.model || null,
-      specs:          body.specs || null,
       purchaseDate:   parseDate(body.purchaseDate),
       purchasePrice:  body.purchasePrice ? parseFloat(body.purchasePrice) : null,
-      currentValue:   body.currentValue ? parseFloat(body.currentValue) : null,
       warrantyExpiry: parseDate(body.warrantyExpiry),
       location:       body.location || null,
       department:     body.department || null,
@@ -50,29 +46,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       notes:          body.notes || null,
     },
   })
-
-  // Log assignment history when person changes
-  if (assignedToChanged) {
-    await prisma.assetAssignment.create({
-      data: {
-        assetId: params.id,
-        assignedTo: body.assignedTo,
-        userId: (session.user as any).id,
-        notes: existing?.assignedTo
-          ? `Reassigned from ${existing.assignedTo}`
-          : 'Newly assigned',
-      },
-    })
-  }
-
-  return NextResponse.json(asset)
+  return NextResponse.json(item)
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const role = (session.user as any).role
-  if (role !== 'ADMIN') return NextResponse.json({ error: 'Only admins can delete assets' }, { status: 403 })
-  await prisma.asset.delete({ where: { id: params.id } })
+  if (role !== 'ADMIN') return NextResponse.json({ error: 'Only admins can delete' }, { status: 403 })
+  await prisma.accessory.delete({ where: { id: params.id } })
   return NextResponse.json({ success: true })
 }

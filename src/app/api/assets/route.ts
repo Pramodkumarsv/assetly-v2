@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { parseDate } from '@/lib/utils'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -28,20 +29,20 @@ export async function POST(req: NextRequest) {
         brand: body.brand || null,
         model: body.model || null,
         specs: body.specs || null,
-        purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : null,
-        purchasePrice: body.purchasePrice ? parseFloat(body.purchasePrice) : null,
-        currentValue: body.currentValue ? parseFloat(body.currentValue) : null,
-        warrantyExpiry: body.warrantyExpiry ? new Date(body.warrantyExpiry) : null,
-        location: body.location || null,
-        department: body.department || null,
-        assignedTo: body.assignedTo || null,
-        notes: body.notes || null,
+        purchaseDate:   parseDate(body.purchaseDate),
+        purchasePrice:  body.purchasePrice ? parseFloat(body.purchasePrice) : null,
+        currentValue:   body.currentValue ? parseFloat(body.currentValue) : null,
+        warrantyExpiry: parseDate(body.warrantyExpiry),
+        location:    body.location || null,
+        department:  body.department || null,
+        assignedTo:  body.assignedTo || null,
+        assignedDate: body.assignedTo ? new Date() : null, // auto-capture now
+        notes:    body.notes || null,
         imageUrl: body.imageUrl || null,
         userId,
       },
     })
 
-    // Log assignment if assigned
     if (body.assignedTo) {
       await prisma.assetAssignment.create({
         data: { assetId: asset.id, assignedTo: body.assignedTo, userId, notes: 'Initial assignment' },

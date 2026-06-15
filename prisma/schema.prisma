@@ -14,11 +14,11 @@ model User {
   password      String
   role          Role      @default(VIEWER)
   department    String?
-  avatar        String?
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   assets        Asset[]   @relation("CreatedAssets")
+  accessories   Accessory[] @relation("CreatedAccessories")
   assignments   AssetAssignment[]
   maintenances  Maintenance[]
 }
@@ -41,16 +41,39 @@ model Asset {
   location        String?
   department      String?
   assignedTo      String?
-  assignedUserId  String?
+  assignedDate    DateTime?
   notes           String?
   imageUrl        String?
-  qrCode          String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   createdBy       User          @relation("CreatedAssets", fields: [userId], references: [id])
   userId          String
   assignments     AssetAssignment[]
   maintenances    Maintenance[]
+}
+
+model Accessory {
+  id              String           @id @default(cuid())
+  assetTag        String           @unique
+  name            String
+  type            AccessoryType
+  status          AssetStatus      @default(AVAILABLE)
+  serialNumber    String?          @unique
+  brand           String?
+  model           String?
+  purchaseDate    DateTime?
+  purchasePrice   Float?
+  warrantyExpiry  DateTime?
+  location        String?
+  department      String?
+  assignedTo      String?
+  assignedDate    DateTime?
+  notes           String?
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       User             @relation("CreatedAccessories", fields: [userId], references: [id])
+  userId          String
 }
 
 model AssetAssignment {
@@ -82,53 +105,10 @@ model Maintenance {
   createdAt   DateTime          @default(now())
 }
 
-enum Role {
-  ADMIN
-  MANAGER
-  VIEWER
-}
-
-enum AssetType {
-  LAPTOP
-  DESKTOP
-  PHONE
-  TABLET
-  MONITOR
-  KEYBOARD
-  MOUSE
-  PRINTER
-  SERVER
-  NETWORKING
-  SOFTWARE
-  OTHER
-}
-
-enum AssetStatus {
-  AVAILABLE
-  ASSIGNED
-  MAINTENANCE
-  RETIRED
-  LOST
-}
-
-enum Lifecycle {
-  PROCUREMENT
-  ACTIVE
-  MAINTENANCE
-  DISPOSAL
-  RETIRED
-}
-
-enum MaintenanceType {
-  PREVENTIVE
-  CORRECTIVE
-  UPGRADE
-  INSPECTION
-}
-
-enum MaintenanceStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
+enum Role { ADMIN MANAGER VIEWER }
+enum AssetType { LAPTOP DESKTOP PHONE TABLET MONITOR }
+enum AccessoryType { KEYBOARD MOUSE PRINTER SERVER NETWORKING SOFTWARE HEADSET WEBCAM DOCKING_STATION CABLE CHARGER BATTERY STORAGE OTHER }
+enum AssetStatus { AVAILABLE ASSIGNED MAINTENANCE RETIRED LOST }
+enum Lifecycle { PROCUREMENT ACTIVE MAINTENANCE DISPOSAL RETIRED }
+enum MaintenanceType { PREVENTIVE CORRECTIVE UPGRADE INSPECTION }
+enum MaintenanceStatus { SCHEDULED IN_PROGRESS COMPLETED CANCELLED }
